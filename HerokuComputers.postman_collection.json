@@ -1,0 +1,131 @@
+{
+	"variables": [],
+	"info": {
+		"name": "HerokuComputers",
+		"_postman_id": "6f17472d-5107-7df3-a5c3-ecfb07ec39fc",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "getOverview",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": "var data = JSON.stringify(responseBody);\nconsole.log(data);\n\n// This code below doesnt work for now\n// var responseHTML = document.createElement(\"html\");\n// responseHTML.find('actions');\n\n// To do: refactor this into smart solution\nvar n = data.indexOf(\"<h1>\");\n//console.log(n);\nvar na = data.indexOf(\" computers\", n+4);\n//console.log(na);\nvar responseValue = data.substring(n+4, na);\nconsole.log(responseValue);\ntests[\"Found: \"+responseValue+\" computers in the database\"] = responseCode.code === 200;\npostman.setGlobalVariable(\"totalComputers\", responseValue);"
+					}
+				}
+			],
+			"request": {
+				"url": "https://computer-database.herokuapp.com/computers",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": []
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "postNewComputer",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": "if (responseCode.code === 200) {\n    var count = parseInt(postman.getEnvironmentVariable(\"AmountNumber\"));\n    postman.setEnvironmentVariable(\"AmountNumber\", count+1);\n}"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": "// Retrieving values to be used for test\nvar computerName = postman.getEnvironmentVariable(\"defaultTestComputerName\");\nvar number = postman.getEnvironmentVariable(\"AmountNumber\"); \n\n// Settings global values for test\npostman.setGlobalVariable(\"computerName\", computerName+number);\npostman.setGlobalVariable(\"introducedDate\", \"\");\npostman.setGlobalVariable(\"discontinuedDate\", \"\");\npostman.setGlobalVariable(\"companyName\", \"\");"
+					}
+				}
+			],
+			"request": {
+				"url": "https://computer-database.herokuapp.com/computers",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "text/html; charset=utf-8",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "name",
+							"value": "{{computerName}}",
+							"type": "text",
+							"enabled": true
+						},
+						{
+							"key": "introduced",
+							"value": "{{introducedDate}}",
+							"type": "text",
+							"enabled": true
+						},
+						{
+							"key": "discontinued",
+							"value": "{{discontinuedDate}}",
+							"type": "text",
+							"enabled": true
+						},
+						{
+							"key": "company",
+							"value": "{{companyName}}",
+							"type": "text",
+							"enabled": true
+						}
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "searchComputer",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": "// Dump HTML into a stringified response\nvar data = JSON.stringify(responseBody);\nconsole.log(data);\nvar searchItem = postman.getGlobalVariable(\"searchItem\");\n\n// To do: refactor this into smart solution\nvar numberafter = data.indexOf(searchItem);\n//console.log(n);\nvar numberbefore = data.indexOf('/', numberafter-2);\n//console.log(na);\nvar responseValue = data.substring(numberbefore+1, numberafter-2);\nconsole.log(responseValue);\ntests[\"Found database entry number: \"+responseValue] = responseCode.code === 200;\npostman.setGlobalVariable(\"computerID\", responseValue);"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": "// Retrieving values to be used for test\nvar computerName = postman.getGlobalVariable(\"computerName\");\n\n// Settings global values for test\n// Try to search last created item\npostman.setGlobalVariable(\"searchItem\", computerName);"
+					}
+				}
+			],
+			"request": {
+				"url": "https://computer-database.herokuapp.com/computers?f={{searchItem}}",
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"description": ""
+			},
+			"response": []
+		}
+	]
+}
